@@ -1,4 +1,4 @@
-# Бот, итеграция Dialogflow c telegram, vk.
+# Бот итеграция [Dialogflow](https://dialogflow.cloud.google.com/) c [telegram](https://telegram.org/), [vk](https://vk.com/).
 Набор скриптов, который запускает бота(для telegram или vk группы), способного отвечать на несколько заготовленных фраз.
 # Как запустить
 * Для запуска сайта вам понадобится Python третьей версии.
