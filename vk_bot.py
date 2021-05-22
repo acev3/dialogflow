@@ -26,7 +26,7 @@ def detect_intent_texts(project_id, session_id, texts, language_code="ru-RU"):
     session_client = dialogflow.SessionsClient()
 
     session = session_client.session_path(project_id, session_id)
-    print("Session path: {}\n".format(session))
+    logger.info("Session path: {}\n".format(session))
     for text in texts:
         text_input = dialogflow.TextInput(text=text, language_code=language_code)
 
@@ -34,21 +34,23 @@ def detect_intent_texts(project_id, session_id, texts, language_code="ru-RU"):
         response = session_client.detect_intent(
             request={"session": session, "query_input": query_input}
         )
-        print("=" * 20)
-        print("Query text: {}".format(response.query_result.query_text))
-        print(
+        logger.info("=" * 20)
+        logger.info("Query text: {}".format(response.query_result.query_text))
+        logger.info(
             "Detected intent: {} (confidence: {})\n".format(
                 response.query_result.intent.display_name,
                 response.query_result.intent_detection_confidence,
             )
         )
-        print("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
+        logger.info("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
     if response.query_result.intent.is_fallback:
         return False
     return response.query_result.fulfillment_text
 
 
 def main():
+    logging.basicConfig(level=logging.ERROR)
+    logger.setLevel(logging.DEBUG)
     load_dotenv()
     vk_token = os.environ["VK_GROUP_API_TOKEN"]
     project_id = os.environ["PROJECT_ID"]
@@ -57,15 +59,15 @@ def main():
     vk_api = vk_session.get_api()
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW:
-            print("Новое сообщение:")
+            logger.info("Новое сообщение:")
             if event.to_me:
                 dialogflow_answer = detect_intent_texts(project_id, event.user_id, [event.text], language_code="ru")
                 if dialogflow_answer:
                     send_message(event, vk_api, dialogflow_answer)
-                    print("Для меня от: ", event.user_id)
+                    logger.info("Для меня от: {}".format(event.user_id))
             else:
-                print("От меня для: ", event.user_id)
-            print("Текст:", event.text)
+                logger.info("От меня для: {}".format(event.user_id))
+            logger.info("Текст: {}".format(event.text))
 
 
 if __name__ == '__main__':

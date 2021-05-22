@@ -11,6 +11,12 @@ def start(bot, update):
     chat_id = os.environ['CHAT_ID']
     bot.sendMessage(chat_id=chat_id, text="Здравствуйте")
 
+
+def error(bot, update, error):
+    """Log Errors caused by Updates."""
+    logger.warning('Update "%s" caused error "%s"', update, error)
+
+
 def send_message(bot, update):
     chat_id = os.environ['CHAT_ID']
     project_id = os.environ['PROJECT_ID']
@@ -28,7 +34,7 @@ def detect_intent_texts(project_id, session_id, texts, language_code="ru-RU"):
     session_client = dialogflow.SessionsClient()
 
     session = session_client.session_path(project_id, session_id)
-    print("Session path: {}\n".format(session))
+    logger.info("Session path: {}\n".format(session))
     for text in texts:
         text_input = dialogflow.TextInput(text=text, language_code=language_code)
 
@@ -36,25 +42,29 @@ def detect_intent_texts(project_id, session_id, texts, language_code="ru-RU"):
         response = session_client.detect_intent(
             request={"session": session, "query_input": query_input}
         )
-        print("=" * 20)
-        print("Query text: {}".format(response.query_result.query_text))
-        print(
+        logger.info("=" * 20)
+        logger.info("Query text: {}".format(response.query_result.query_text))
+        logger.info(
             "Detected intent: {} (confidence: {})\n".format(
                 response.query_result.intent.display_name,
                 response.query_result.intent_detection_confidence,
             )
         )
-        print("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
+        logger.info("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
     return response.query_result.fulfillment_text
 
 
 def main():
     load_dotenv()
+    logging.basicConfig(level=logging.ERROR)
+    logger.setLevel(logging.DEBUG)
+    chat_id = os.environ['CHAT_ID']
     api_tme_token = os.environ["TELEGRAM_API_TOKEN"]
     updater = Updater(token=api_tme_token)
     start_handler = CommandHandler("start", start)
     updater.dispatcher.add_handler(start_handler)
     updater.dispatcher.add_handler(MessageHandler(Filters.text, send_message))
+    updater.dispatcher.add_error_handler(error)
     updater.start_polling()
 
 if __name__ == '__main__':
