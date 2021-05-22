@@ -5,7 +5,7 @@ import os
 import random
 import logging
 
-logger = logging.getLogger("VK_BotLogger")
+logger = logging.getLogger(__file__)
 
 
 def send_message(event, vk_api, dialogflow_answer):

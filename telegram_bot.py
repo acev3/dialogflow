@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import os
 import logging
 
-logger = logging.getLogger("TG_BotLogger")
+logger = logging.getLogger(__file__)
+
 
 def start(bot, update):
     chat_id = os.environ['CHAT_ID']
